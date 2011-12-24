@@ -61,81 +61,86 @@
 #   TODO:
 #
 
-# __________________gdb options_________________
+define set-defaults
+    # __________________gdb options_________________
 
-# set to 1 to enable 64bits target by default (32bits is the default)
-set $64BITS = 0
-# set to 0 if you have problems with the colorized prompt - reported by Plouj with Ubuntu gdb 7.2
-set $COLOUREDPROMPT = 1
-# Colour the first line of the disassembly - default is green, if you want to change it search for
-# SETCOLOUR1STLINE and modify it :-)
-set $SETCOLOUR1STLINE = 0
-# set to 0 to remove display of objectivec messages (default is 1)
-set $SHOWOBJECTIVEC = 1
-# set to 0 to remove display of cpu registers (default is 1)
-set $SHOWCPUREGISTERS = 1
-# set to 1 to enable display of stack (default is 0)
-set $SHOWSTACK = 0
-# set to 1 to enable display of data window (default is 0)
-set $SHOWDATAWIN = 0
-# set to 0 to disable coloured display of changed registers
-set $SHOWREGCHANGES = 1
+    # set to 1 to enable 64bits target by default (32bits is the default)
+    set $64BITS = 1
+    # set to 0 if you have problems with the colorized prompt - reported by Plouj with Ubuntu gdb 7.2
+    set $COLOUREDPROMPT = 1
+    # Colour the first line of the disassembly - default is green, if you want to change it search for
+    # SETCOLOUR1STLINE and modify it :-)
+    set $SETCOLOUR1STLINE = 0
+    # set to 0 to remove display of objectivec messages (default is 1)
+    set $SHOWOBJECTIVEC = 1
+    # set to 0 to remove display of cpu registers (default is 1)
+    set $SHOWCPUREGISTERS = 1
+    # set to 1 to enable display of stack (default is 0)
+    set $SHOWSTACK = 0
+    # set to 1 to enable display of data window (default is 0)
+    set $SHOWDATAWIN = 0
+    # set to 0 to disable coloured display of changed registers
+    set $SHOWREGCHANGES = 1
 
-set confirm off
-set verbose off
+    set confirm off
+    set verbose off
 
-if $COLOUREDPROMPT == 1
-	set prompt \033[31mgdb$ \033[0m
+    if $COLOUREDPROMPT == 1
+        set prompt \033[31mgdb$ \033[0m
+    end
+
+    set output-radix 0x10
+    set input-radix 0x10
+
+    # These make gdb never pause in its output
+    set height 0
+    set width 0
+
+    # Display instructions in Intel format - change to "att" if you prefer AT&T format
+    set disassembly-flavor intel
+
+    set $SHOW_CONTEXT = 1
+    set $SHOW_NEST_INSN = 0
+
+    set $CONTEXTSIZE_STACK = 6
+    set $CONTEXTSIZE_DATA  = 8
+    set $CONTEXTSIZE_CODE  = 8
+
+    # __________________end gdb options_________________
+
+    # Initialize these variables else comparisons will fail for colouring
+    # we must initialize all of them at once, 32 and 64 bits.
+    set $oldrax = 0
+    set $oldrbx = 0
+    set $oldrcx = 0
+    set $oldrdx = 0
+    set $oldrsi = 0
+    set $oldrdi = 0
+    set $oldrbp = 0
+    set $oldrsp = 0
+    set $oldr8  = 0
+    set $oldr9  = 0
+    set $oldr10 = 0
+    set $oldr11 = 0
+    set $oldr12 = 0
+    set $oldr13 = 0
+    set $oldr14 = 0
+    set $oldr15 = 0
+    set $oldeax = 0
+    set $oldebx = 0
+    set $oldecx = 0
+    set $oldedx = 0
+    set $oldesi = 0
+    set $oldedi = 0
+    set $oldebp = 0
+    set $oldesp = 0
+
+    # used by ptraceme/rptraceme
+    set $ptrace_bpnum = 0
 end
-
-set output-radix 0x10
-set input-radix 0x10
-
-# These make gdb never pause in its output
-set height 0
-set width 0
-
-# Display instructions in Intel format - change to "att" if you prefer AT&T format
-set disassembly-flavor intel
-
-set $SHOW_CONTEXT = 1
-set $SHOW_NEST_INSN = 0
-
-set $CONTEXTSIZE_STACK = 6
-set $CONTEXTSIZE_DATA  = 8
-set $CONTEXTSIZE_CODE  = 8
-
-# __________________end gdb options_________________
-
-# Initialize these variables else comparisons will fail for colouring
-# we must initialize all of them at once, 32 and 64 bits.
-set $oldrax = 0
-set $oldrbx = 0
-set $oldrcx = 0
-set $oldrdx = 0
-set $oldrsi = 0
-set $oldrdi = 0
-set $oldrbp = 0
-set $oldrsp = 0
-set $oldr8  = 0
-set $oldr9  = 0
-set $oldr10 = 0
-set $oldr11 = 0
-set $oldr12 = 0
-set $oldr13 = 0
-set $oldr14 = 0
-set $oldr15 = 0
-set $oldeax = 0
-set $oldebx = 0
-set $oldecx = 0
-set $oldedx = 0
-set $oldesi = 0
-set $oldedi = 0
-set $oldebp = 0
-set $oldesp = 0
-
-# used by ptraceme/rptraceme
-set $ptrace_bpnum = 0
+document set-defaults
+Set default config parameters
+end
 
 # ______________window size control___________
 define contextsize-stack
@@ -1466,57 +1471,57 @@ define context
        	 set $context_i--
     	end
     end
-# show the objective C message being passed to msgSend
-   if $SHOWOBJECTIVEC == 1
-#FIXME64
-# What a piece of crap that's going on here :)
-# detect if it's the correct opcode we are searching for
-    	set $__byte1 = *(unsigned char *)$pc
-    	set $__byte = *(int *)$pc
-#
-    	if ($__byte == 0x4244489)
-      		set $objectivec = $eax
-      		set $displayobjectivec = 1
-    	end
-#
-    	if ($__byte == 0x4245489)
-     		set $objectivec = $edx
-     		set $displayobjectivec = 1
-    	end
-#
-    	if ($__byte == 0x4244c89)
-     		set $objectivec = $edx
-     		set $displayobjectivec = 1
-    	end
-# and now display it or not (we have no interest in having the info displayed after the call)
-    	if $__byte1 == 0xE8
-     		if $displayobjectivec == 1
-      			echo \033[34m
-      			printf "--------------------------------------------------------------------"
-  			    if ($64BITS == 1)
-			     printf "---------------------------------------------"
-	    		end
-			echo \033[34m\033[1m
-			printf "[ObjectiveC]\n"
-      			echo \033[0m\033[30m
-      			x/s $objectivec
-     		end   
-     		set $displayobjectivec = 0     
-    	end
-    	if $displayobjectivec == 1
-      		echo \033[34m
-      		printf "--------------------------------------------------------------------"
-      		if ($64BITS == 1)
-	     	 printf "---------------------------------------------"
-	    	end
-		echo \033[34m\033[1m
-		printf "[ObjectiveC]\n"
-      		echo \033[0m\033[30m
-      		x/s $objectivec 
-    	end   
-   end
-    echo \033[0m
-# and this is the end of this little crap
+## show the objective C message being passed to msgSend
+#   if $SHOWOBJECTIVEC == 1
+##FIXME64
+## What a piece of crap that's going on here :)
+## detect if it's the correct opcode we are searching for
+#    	set $__byte1 = *(unsigned char *)$pc
+#    	set $__byte = *(int *)$pc
+##
+#    	if ($__byte == 0x4244489)
+#      		set $objectivec = $eax
+#      		set $displayobjectivec = 1
+#    	end
+##
+#    	if ($__byte == 0x4245489)
+#     		set $objectivec = $edx
+#     		set $displayobjectivec = 1
+#    	end
+##
+#    	if ($__byte == 0x4244c89)
+#     		set $objectivec = $edx
+#     		set $displayobjectivec = 1
+#    	end
+## and now display it or not (we have no interest in having the info displayed after the call)
+#    	if $__byte1 == 0xE8
+#     		if $displayobjectivec == 1
+#      			echo \033[34m
+#      			printf "--------------------------------------------------------------------"
+#  			    if ($64BITS == 1)
+#			     printf "---------------------------------------------"
+#	    		end
+#			echo \033[34m\033[1m
+#			printf "[ObjectiveC]\n"
+#      			echo \033[0m\033[30m
+#      			x/s $objectivec
+#     		end   
+#     		set $displayobjectivec = 0     
+#    	end
+#    	if $displayobjectivec == 1
+#      		echo \033[34m
+#      		printf "--------------------------------------------------------------------"
+#      		if ($64BITS == 1)
+#	     	 printf "---------------------------------------------"
+#	    	end
+#		echo \033[34m\033[1m
+#		printf "[ObjectiveC]\n"
+#      		echo \033[0m\033[30m
+#      		x/s $objectivec 
+#    	end   
+#   end
+#    echo \033[0m
+## and this is the end of this little crap
 
     if $SHOWDATAWIN == 1
 	 datawin
@@ -2202,6 +2207,7 @@ end
 
 # ____________________misc____________________
 define hook-stop
+    print $SHOW_CONTEXT
 
     # this makes 'context' be called at every BP/step
     if ($SHOW_CONTEXT > 0)
