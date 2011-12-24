@@ -2207,7 +2207,6 @@ end
 
 # ____________________misc____________________
 define hook-stop
-    print $SHOW_CONTEXT
 
     # this makes 'context' be called at every BP/step
     if ($SHOW_CONTEXT > 0)
